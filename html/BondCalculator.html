@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BondCalculator module &#8212; 到期收益率 1.0 文档</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=61cd365c" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=f115507d"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/translations.js?v=beaddf03"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜索" href="search.html" />
+    <link rel="next" title="jms_sqlconnect module" href="jms_sqlconnect.html" />
+    <link rel="prev" title="欢迎来到 到期收益率 的文档!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-BondCalculator">
+<span id="bondcalculator-module"></span><h1>BondCalculator module<a class="headerlink" href="#module-BondCalculator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="BondCalculator.BondCalculator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BondCalculator.</span></span><span class="sig-name descname"><span class="pre">BondCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mazx'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qaz12345678'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rd'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BondCalculator.html#BondCalculator"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#BondCalculator.BondCalculator" title="Link to this definition">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl>
+<dt><strong>模块介绍:</strong></dt><dd><p>模块定义了一个BondCalculator类，用于计算债券的到期收益率（YTM）和相关的现金流信息。它通过与数据库的连接，获取债券的相关数据，并根据交易日期和价格计算YTM，支持普通债券和可赎回债券的计算。</p>
+</dd>
+<dt><strong>方法介绍:</strong></dt><dd><p>1.类的构造函数__init__接受数据库连接的用户凭据</p>
+<p>2.YTM_coupon_bond方法根据债券代码、价格和交易日期计算YTM，判断债券是否可赎回，并调用YTM_coupon_bond_exercise或YTM_coupon_normal计算方法。</p>
+<p>3.YTM_coupon_bond_exercise和YTM_coupon_bond_normal方法分别计算可赎回债券和普通债券的YTM。</p>
+<p>4.process_data方法调用YTM_coupon_bond方法计算结果，并将债券代码写入Excel文件。
+<strong>支持不同债券数据重复使用，可将数据一并添加到一个Excel文件，及两个工作表sheet_YTM和sheet_cash_flow</strong></p>
+</dd>
+<dt><strong>建议使用准备:</strong></dt><dd><p>1.请确定模块所需python包在环境中下载</p>
+<p>2.请将jms_connect放入同一个文件路径</p>
+<p>3.获取jms_connect账密</p>
+<p>4.创建数据存储路径</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="BondCalculator.BondCalculator.YTM_coupon_bond">
+<span class="sig-name descname"><span class="pre">YTM_coupon_bond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bond_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traded_date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BondCalculator.html#BondCalculator.YTM_coupon_bond"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#BondCalculator.BondCalculator.YTM_coupon_bond" title="Link to this definition">¶</a></dt>
+<dd><dl>
+<dt><strong>介绍:</strong></dt><dd><p>计算某债券在给定交易日的到期收益率。</p>
+<p>1.函数执行SQL查询，从数据库中检索债券信息和行权日期。</p>
+<p>2.通过检查债券的标签来判断债券是否可赎回。</p>
+<p>3.根据行权日期的存在与否，计算正常的YTM或同时计算正常和行权的YTM，并以字典形式返回结果。</p>
+</dd>
+<dt>参数:</dt><dd><p>bond_code (str): 债券代码。</p>
+<p>price (float): 交易日净价。</p>
+<p>traded_date (str): 债券的交易日，格式为 ‘YYYY-MM-DD’。</p>
+</dd>
+<dt>返回类型:</dt><dd><p>YTM(float): 债券的到期收益率（YTM）。</p>
+</dd>
+<dt>用法:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span>   <span class="kn">from</span> <span class="nn">BondCalculator</span> <span class="kn">import</span> <span class="n">BondCalculator</span> <span class="k">as</span> <span class="n">bc</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="nb">object</span> <span class="o">=</span> <span class="n">bc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">bond_code</span> <span class="o">=</span> <span class="s1">&#39;152961.SH&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">price</span> <span class="o">=</span> <span class="mf">84.63</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">traded_date</span> <span class="o">=</span> <span class="s1">&#39;2024-7-25&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;/Users/mac/Desktop/YY/收益率脚本/YTM_2024_8_23.xlsx&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">sheet_YTM</span> <span class="o">=</span> <span class="s1">&#39;YTM&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">sheet_cash_flow</span> <span class="o">=</span> <span class="s1">&#39;cash_flow&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">ytm</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">YTM_coupon_bond</span><span class="p">(</span><span class="n">bond_code</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">traded_date</span><span class="p">)</span>
+<span class="go">return {</span>
+<span class="go">&#39;行权收益率&#39;: 2.3218890242845047,</span>
+<span class="go">&#39;行权日&#39;: datetime.date(2026, 7, 21),</span>
+<span class="go">&#39;行权信息&#39;: ·······</span>
+<span class="go">&#39;到期收益率&#39;: 3.2840096938381316,</span>
+<span class="go">&#39;现金流&#39;: ·······</span>
+<span class="go">&#39;应付利息&#39;: 0.063233,</span>
+<span class="go">&#39;全价&#39;: 84.693233}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BondCalculator.BondCalculator.YTM_coupon_bond_exercise">
+<span class="sig-name descname"><span class="pre">YTM_coupon_bond_exercise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bond_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traded_date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BondCalculator.html#BondCalculator.YTM_coupon_bond_exercise"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#BondCalculator.BondCalculator.YTM_coupon_bond_exercise" title="Link to this definition">¶</a></dt>
+<dd><dl>
+<dt><strong>介绍:</strong></dt><dd><p>计算债券在交易日最近一个行权日的到期收益率（YTM）。</p>
+<p>该函数接受三个参数：bond_code、price 和 traded_date。
+它查询数据库以获取与债券相关的现金流和行权信息。
+计算前一个和下一个支付日期、应付利息和总价格。
+确定交易日期后的第一个行权日期，并计算应付利息和本金。
+嵌套函数使用牛顿法计算基于现金流的YTM。</p>
+<p>使用方法与YTM_coupon_bond完全相同</p>
+</dd>
+<dt><strong>重要:</strong>:</dt><dd><p>行权债才能单独使用,否则会抛出错误</p>
+</dd>
+<dt>参数:</dt><dd><p>bond_code (str): 债券代码。
+price (float): 交易日净价。
+traded_date (str): 债券的交易日，格式为 ‘YYYY-MM-DD’。</p>
+</dd>
+<dt>返回:</dt><dd><p>dict: 包含行权收益率（YTM）、行权日和行权信息的字典。</p>
+</dd>
+<dt>抛出:</dt><dd><p>ValueError: 没有找到合适的行权日期。</p>
+</dd>
+<dt>用法:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span>   <span class="kn">from</span> <span class="nn">BondCalculator</span> <span class="kn">import</span> <span class="n">BondCalculator</span> <span class="k">as</span> <span class="n">bc</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="nb">object</span> <span class="o">=</span> <span class="n">bc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">bond_code</span> <span class="o">=</span> <span class="s1">&#39;152961.SH&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">price</span> <span class="o">=</span> <span class="mf">84.63</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">traded_date</span> <span class="o">=</span> <span class="s1">&#39;2024-7-25&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;/Users/mac/Desktop/YY/收益率脚本/YTM_2024_8_23.xlsx&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">sheet_YTM</span> <span class="o">=</span> <span class="s1">&#39;YTM&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">sheet_cash_flow</span> <span class="o">=</span> <span class="s1">&#39;cash_flow&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">ytm</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">YTM_coupon_bond_exercise</span><span class="p">(</span><span class="n">bond_code</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">traded_date</span><span class="p">)</span>
+<span class="go">return {</span>
+<span class="go">&#39;行权收益率&#39;: 2.3218890242845047,</span>
+<span class="go">&#39;行权日&#39;: datetime.date(2026, 7, 21),</span>
+<span class="go">&#39;行权信息&#39;:    level_0  index exercise_date  exercise_type</span>
+<span class="go">0        0      0    2026-07-21           1001}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BondCalculator.BondCalculator.YTM_coupon_bond_normal">
+<span class="sig-name descname"><span class="pre">YTM_coupon_bond_normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bond_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traded_date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BondCalculator.html#BondCalculator.YTM_coupon_bond_normal"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#BondCalculator.BondCalculator.YTM_coupon_bond_normal" title="Link to this definition">¶</a></dt>
+<dd><dl>
+<dt><strong>介绍:</strong></dt><dd><p>根据债券的现金流和交易日计算到期收益率（YTM）。</p>
+<p>此函数检索指定债券的现金流数据，计算应计利息，并确定债券的全价和到期收益率。</p>
+<p>使用方法与YTM_coupon_bond_normal一致,可以单独使用计算完整现金流到期收益率</p>
+</dd>
+<dt>参数:</dt><dd><p>bond_code (str): 债券的唯一标识符。
+price (float): 债券的市场价格。
+traded_date (str): 债券交易日期，格式为 ‘YYYY-MM-DD’。</p>
+</dd>
+<dt>返回类型:</dt><dd><p>dict: 包含计算得到的 YTM、现金流 DataFrame、应计利息和债券全价的字典。</p>
+</dd>
+<dt>抛出:</dt><dd><p>ValueError: 如果交易日期无效或债券代码在数据库中不存在。</p>
+</dd>
+<dt>用法：</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span>   <span class="kn">from</span> <span class="nn">BondCalculator</span> <span class="kn">import</span> <span class="n">BondCalculator</span> <span class="k">as</span> <span class="n">bc</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="nb">object</span> <span class="o">=</span> <span class="n">bc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">bond_code</span> <span class="o">=</span> <span class="s1">&#39;152961.SH&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">price</span> <span class="o">=</span> <span class="mf">84.63</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">traded_date</span> <span class="o">=</span> <span class="s1">&#39;2024-7-25&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;/Users/mac/Desktop/YY/收益率脚本/YTM_2024_8_23.xlsx&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">sheet_YTM</span> <span class="o">=</span> <span class="s1">&#39;YTM&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">sheet_cash_flow</span> <span class="o">=</span> <span class="s1">&#39;cash_flow&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">ytm</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">YTM_coupon_bond_exercise</span><span class="p">(</span><span class="n">bond_code</span><span class="p">,</span> <span class="n">price</span><span class="p">,</span> <span class="n">traded_date</span><span class="p">)</span>
+<span class="go">return</span>
+<span class="go">    {</span>
+<span class="go">    &#39;到期收益率&#39;: 35.695510535908966,</span>
+<span class="go">    &#39;现金流&#39;: ·······，</span>
+<span class="go">    &#39;应付利息&#39;: 0.944754,</span>
+<span class="go">    &#39;全价&#39;: 85.574754</span>
+<span class="go">    }</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="BondCalculator.BondCalculator.process_data">
+<span class="sig-name descname"><span class="pre">process_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bond_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traded_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet_YTM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet_cash_flow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BondCalculator.html#BondCalculator.process_data"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#BondCalculator.BondCalculator.process_data" title="Link to this definition">¶</a></dt>
+<dd><dl>
+<dt><strong>介绍：</strong></dt><dd><p>这段代码定义了一个名为 process_data 的方法，用于处理与债券相关的金融数据，并将其附加到现有的 Excel 文件中。它检索指定债券的到期收益率（YTM）和现金流数据，将这些数据组织成结构化格式，并写入指定的工作表。</p>
+</dd>
+<dt><strong>重要：</strong></dt><dd><p>1.这个函数并不返回数据，而将数据写入文件路径
+2.**支持不同债券数据重复使用，可将数据一并添加到一个Excel文件，及两个工作表sheet_YTM和sheet_cash_flow**</p>
+</dd>
+<dt>参数:</dt><dd><p>bond_code (str): 债券代码。
+price (float): 交易日净价。
+traded_date (str): 债券的交易日，格式为 ‘YYYY-MM-DD’。
+file_path (str): 要追加数据的 Excel 文件路径。
+sheet_YTM (str): 存储 YTM 数据的 Excel 工作表名称。
+sheet_cash_flow (str): 存储现金流数据的 Excel 工作表名称。</p>
+</dd>
+<dt>抛出:</dt><dd><p>Exception: 如果在处理数据时发生错误。</p>
+</dd>
+<dt>返回类型:</dt><dd><p>None</p>
+</dd>
+<dt>用法:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">BondCalculator</span> <span class="kn">import</span> <span class="n">BondCalculator</span> <span class="k">as</span> <span class="n">bc</span> <span class="c1"># 导入文件</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">object</span> <span class="o">=</span> <span class="n">bc</span><span class="p">()</span> <span class="c1">#  实例化</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bond_code</span> <span class="o">=</span> <span class="s1">&#39;152961.SH&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">price</span> <span class="o">=</span> <span class="mf">84.63</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">traded_date</span> <span class="o">=</span> <span class="s1">&#39;2024-7-25&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;/Users/mac/Desktop/YY/收益率脚本/YTM_2024_8_23.xlsx&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sheet_YTM</span> <span class="o">=</span> <span class="s1">&#39;YTM&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sheet_cash_flow</span> <span class="o">=</span> <span class="s1">&#39;cash_flow&#39;</span><span class="c1"># 定义参数</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">到期收益率</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption" role="heading"><span class="caption-text">目录:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">BondCalculator module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#BondCalculator.BondCalculator"><code class="docutils literal notranslate"><span class="pre">BondCalculator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jms_sqlconnect.html">jms_sqlconnect module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="上一章">欢迎来到 到期收益率 的文档!</a></li>
+      <li>Next: <a href="jms_sqlconnect.html" title="下一章">jms_sqlconnect module</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="提交" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, hwccurry.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.3.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/BondCalculator.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

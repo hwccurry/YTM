@@ -1,0 +1,7 @@
+jms\_sqlconnect module
+======================
+
+.. automodule:: jms_sqlconnect
+   :members:
+   :undoc-members:
+   :show-inheritance:
